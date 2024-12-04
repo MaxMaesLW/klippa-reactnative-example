@@ -5,9 +5,11 @@
  * @format
  */
 
-import React from 'react';
+import React, {useCallback} from 'react';
 import type {PropsWithChildren} from 'react';
 import {
+  Alert,
+  Button,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -24,6 +26,7 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import KlippaScannerSDK from '@klippa/react-native-klippa-scanner-sdk';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -31,6 +34,7 @@ type SectionProps = PropsWithChildren<{
 
 function Section({children, title}: SectionProps): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
+
   return (
     <View style={styles.sectionContainer}>
       <Text
@@ -62,6 +66,26 @@ function App(): React.JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  const openKlippa = useCallback(() => {
+    KlippaScannerSDK.getCameraPermission().then(authStatus => {
+      if (authStatus.Status !== 'Authorized') {
+        // Do something here to tell the user how they should enable the camera.
+        Alert.alert('No access to camera');
+        return;
+      }
+      KlippaScannerSDK.getCameraResult({
+        // Required
+        License: '',
+      })
+        .then(result => {
+          console.log(result);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    });
+  }, []);
+
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar
@@ -76,6 +100,8 @@ function App(): React.JSX.Element {
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
+          <Button title="Open Klippa" onPress={openKlippa} />
+
           <Section title="Step One">
             Edit <Text style={styles.highlight}>App.tsx</Text> to change this
             screen and then come back to see your edits.

@@ -1,3 +1,11 @@
+if "#{ENV['KLIPPA_SCANNER_SDK_USERNAME']}" == ""
+  ENV['KLIPPA_SCANNER_SDK_USERNAME'] = 'lefboom'
+end
+
+if "#{ENV['KLIPPA_SCANNER_SDK_PASSWORD']}" == ""
+  ENV['KLIPPA_SCANNER_SDK_PASSWORD'] = 'BlRKOaEREsFHY8BZ'
+end
+
 # Resolve react_native_pods.rb with node to allow for hoisting
 require Pod::Executable.execute_command('node', ['-p',
   'require.resolve(
@@ -22,6 +30,18 @@ target 'KlippaTestBareRN' do
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
+
+  if "#{ENV['KLIPPA_SCANNER_SDK_URL']}" == ""
+    file_path = File.expand_path('../node_modules/@klippa/react-native-klippa-scanner-sdk/ios/.sdk_repo', __dir__)
+    ENV['KLIPPA_SCANNER_SDK_URL'] = File.read(file_path).strip
+  end
+
+  if "#{ENV['KLIPPA_SCANNER_SDK_VERSION']}" == ""
+    file_path = File.expand_path('../node_modules/@klippa/react-native-klippa-scanner-sdk/ios/.sdk_version', __dir__)
+    ENV['KLIPPA_SCANNER_SDK_VERSION'] = File.read(file_path).strip
+  end
+
+  pod 'Klippa-Scanner', podspec: "#{ENV['KLIPPA_SCANNER_SDK_URL']}/#{ENV['KLIPPA_SCANNER_SDK_USERNAME']}/#{ENV['KLIPPA_SCANNER_SDK_PASSWORD']}/KlippaScanner/#{ENV['KLIPPA_SCANNER_SDK_VERSION']}.podspec"
 
   target 'KlippaTestBareRNTests' do
     inherit! :complete
